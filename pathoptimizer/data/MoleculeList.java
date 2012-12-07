@@ -7,7 +7,7 @@ import java.util.AbstractList;
 import java.util.Vector;
 
 /**
- * @author Foeclan
+ * @author Michael Vieths
  * 
  */
 public class MoleculeList extends AbstractList<Molecule> {

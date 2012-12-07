@@ -9,9 +9,8 @@ import javax.swing.UIManager;
 import pathoptimizer.data.Pathway;
 import pathoptimizer.ui.SimPanel;
 
-
 /**
- * @author Foeclan
+ * @author Michael Vieths
  * 
  */
 public class Launcher {

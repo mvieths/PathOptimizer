@@ -17,7 +17,7 @@ import org.sbml.libsbml.SBMLReader;
 import org.sbml.libsbml.SpeciesReference;
 
 /**
- * @author Foeclan
+ * @author Michael Vieths
  * 
  */
 public class Pathway {
