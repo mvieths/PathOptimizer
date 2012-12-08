@@ -21,8 +21,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.sbml.libsbml.Model;
 
-import pathoptimizer.data.Pathway;
-
+import pathoptimizer.data.PathOpt;
 
 /**
  * @author Foeclan
@@ -38,14 +37,13 @@ public class SimPanel extends JPanel implements ActionListener {
 	private JTextArea output;
 	private JTextField numRuns;
 	private Model myModel;
-	Pathway pathway;
+	PathOpt pathway;
 
-	public SimPanel(Pathway path) {
+	public SimPanel(PathOpt path) {
 		super();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		pathway = path;
-		myModel = pathway.getModel();
 
 		table = new JTable(new SimTableModel(path));
 		table.setPreferredScrollableViewportSize(new Dimension(800, 500));
@@ -87,7 +85,7 @@ public class SimPanel extends JPanel implements ActionListener {
 			try {
 				int iterations = Integer.parseInt(numRuns.getText());
 				System.out.println("Starting sim");
-				pathway.runSimulation(iterations);
+				// pathway.runSimulation(iterations);
 				System.out.println("Sim over");
 
 				SimTableModel myTableModel = (SimTableModel) table.getModel();

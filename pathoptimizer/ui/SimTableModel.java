@@ -6,7 +6,7 @@ package pathoptimizer.ui;
 import javax.swing.table.AbstractTableModel;
 
 import pathoptimizer.data.MoleculeList;
-import pathoptimizer.data.Pathway;
+import pathoptimizer.data.PathOpt;
 
 
 /**
@@ -21,7 +21,7 @@ public class SimTableModel extends AbstractTableModel {
 	MoleculeList list;
 	MoleculeList curList;
 
-	public SimTableModel(Pathway path) {
+	public SimTableModel(PathOpt path) {
 		list = path.getMolecules();
 		curList = path.getMolecules();
 

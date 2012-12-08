@@ -3,11 +3,7 @@
  */
 package pathoptimizer;
 
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-
-import pathoptimizer.data.Pathway;
-import pathoptimizer.ui.SimPanel;
+import pathoptimizer.data.PathOpt;
 
 /**
  * @author Michael Vieths
@@ -18,17 +14,6 @@ public class Launcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		// TODO Auto-generated method stub
-		// Format:
-		// <molecule>
-		// <Type>Proteins</Type>
-		// <Name>ERK1 [cytosol]</Name>
-		// <Uniprot_ID>P27361</Uniprot_ID>
-		// <Gene_Name>MAPK3</Gene_Name>
-		// <ChEBI_ID>N/A</ChEBI_ID>
-		// </molecule>
-
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -46,29 +31,29 @@ public class Launcher {
 		String pathwayFile = System.getenv("PATHWAY_FILE");
 		String defaultsFile = System.getenv("DEFAULTS_FILE");
 
-		Pathway path;
+		PathOpt path;
 
 		if (defaultsFile == null) {
-			path = new Pathway(pathwayFile);
+			path = new PathOpt(pathwayFile);
 		} else {
 			System.out.println("Using defaults file " + defaultsFile);
-			path = new Pathway(pathwayFile, defaultsFile);
+			path = new PathOpt(pathwayFile, defaultsFile);
 		}
 
-		// Disable boldface controls.
-		UIManager.put("swing.boldMetal", Boolean.FALSE);
-
-		// Create and set up the window.
-		JFrame frame = new JFrame("Pathway Simulator");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		// Create and set up the content pane.
-		SimPanel newContentPane = new SimPanel(path);
-		newContentPane.setOpaque(true); // content panes must be opaque
-		frame.setContentPane(newContentPane);
-
-		// Display the window.
-		frame.pack();
-		frame.setVisible(true);
+		// // Disable boldface controls.
+		// UIManager.put("swing.boldMetal", Boolean.FALSE);
+		//
+		// // Create and set up the window.
+		// JFrame frame = new JFrame("Pathway Simulator");
+		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//
+		// // Create and set up the content pane.
+		// SimPanel newContentPane = new SimPanel(path);
+		// newContentPane.setOpaque(true); // content panes must be opaque
+		// frame.setContentPane(newContentPane);
+		//
+		// // Display the window.
+		// frame.pack();
+		// frame.setVisible(true);
 	}
 }
