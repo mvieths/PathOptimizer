@@ -25,6 +25,8 @@ import org.biopax.paxtools.model.BioPAXElement;
 import org.biopax.paxtools.model.BioPAXLevel;
 import org.biopax.paxtools.model.Model;
 import org.biopax.paxtools.model.level3.Pathway;
+import org.biopax.paxtools.model.level3.PathwayStep;
+import org.biopax.paxtools.model.level3.Process;
 
 /**
  * @author Michael Vieths
@@ -78,20 +80,33 @@ public class PathOpt {
 			// supported!)
 			final Set<Pathway> thisPathway = new HashSet<Pathway>();
 			thisPathway.addAll(model.getObjects(Pathway.class));
+			System.out.println("There are " + model.getObjects().size() + " objects in the model");
+
+			// Iterator<Pathway> iter = thisPathway.iterator();
+			// while (iter.hasNext()) {
+			// Pathway foo = iter.next();
+			// System.out.println(" " + foo.getName());
+			// }
 
 			Iterator<Pathway> iter = thisPathway.iterator();
 			while (iter.hasNext()) {
 				Pathway foo = iter.next();
-				System.out.println(" " + foo.getName());
+				Set<PathwayStep> step = foo.getPathwayOrder();
+				Set<Process> component = foo.getPathwayComponent();
+
 			}
 
 			EditorMap editorMap = SimpleEditorMap.get(model.getLevel());
 
 			@SuppressWarnings("unchecked")
 			AbstractTraverser checker = new AbstractTraverser(editorMap) {
-				protected void visit(Object value, BioPAXElement parent, Model model, PropertyEditor editor) {
-					if (value instanceof Pathway && thisPathway.contains(value))
-						model.remove((BioPAXElement) value); // - not a "root" pathway
+				protected void visit(Object value, BioPAXElement parent, Model model1, PropertyEditor editor) {
+					if (value instanceof Pathway && thisPathway.contains(value)) {
+						// System.out.println(" Removing " + value.toString());
+						thisPathway.remove((BioPAXElement) value); // - not a "root" pathway
+					} else {
+						// System.out.println(" Keeping " + value.toString());
+					}
 				}
 			};
 
@@ -99,6 +114,8 @@ public class PathOpt {
 			for (BioPAXElement e : model.getObjects()) {
 				checker.traverse(e, null);
 			}
+
+			System.out.println("There are " + model.getObjects().size() + " objects in the model");
 
 		}
 	}
