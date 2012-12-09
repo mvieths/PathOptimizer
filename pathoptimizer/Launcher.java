@@ -29,16 +29,10 @@ public class Launcher {
 	 */
 	private static void createAndShowGUI() {
 		String pathwayFile = System.getenv("PATHWAY_FILE");
-		String defaultsFile = System.getenv("DEFAULTS_FILE");
 
 		PathOpt path;
 
-		if (defaultsFile == null) {
-			path = new PathOpt(pathwayFile);
-		} else {
-			System.out.println("Using defaults file " + defaultsFile);
-			path = new PathOpt(pathwayFile, defaultsFile);
-		}
+		path = new PathOpt(pathwayFile);
 
 		// // Disable boldface controls.
 		// UIManager.put("swing.boldMetal", Boolean.FALSE);

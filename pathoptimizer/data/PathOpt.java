@@ -3,29 +3,24 @@
  */
 package pathoptimizer.data;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.Vector;
 
-import org.biopax.paxtools.controller.AbstractTraverser;
-import org.biopax.paxtools.controller.EditorMap;
-import org.biopax.paxtools.controller.PropertyEditor;
-import org.biopax.paxtools.controller.SimpleEditorMap;
 import org.biopax.paxtools.io.BioPAXIOHandler;
 import org.biopax.paxtools.io.jena.JenaIOHandler;
 import org.biopax.paxtools.model.BioPAXElement;
 import org.biopax.paxtools.model.BioPAXLevel;
 import org.biopax.paxtools.model.Model;
+import org.biopax.paxtools.model.level3.BiochemicalReaction;
+import org.biopax.paxtools.model.level3.Entity;
 import org.biopax.paxtools.model.level3.Pathway;
-import org.biopax.paxtools.model.level3.PathwayStep;
 import org.biopax.paxtools.model.level3.Process;
 
 /**
@@ -33,13 +28,13 @@ import org.biopax.paxtools.model.level3.Process;
  * 
  */
 public class PathOpt {
-	MoleculeList allMolecules;
 	Model model;
+	TreeNode root;
 
 	// Stack<Reaction> path;
 
-	public PathOpt(String sbmlFile) {
-		init(sbmlFile);
+	public PathOpt(String paxFile) {
+		init(paxFile);
 	}
 
 	private void init(String pathFile) {
@@ -59,143 +54,114 @@ public class PathOpt {
 			System.setErr(oldErr);
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("File " + pathFile + " could not be found");
+			System.exit(1);
 		}
 
 		if (model != null) {
-			// Model model1 = model.getLevel().getDefaultFactory().createModel();
-
-			// PropertyFilter filter = new PropertyFilter() {
-			// public boolean filter(PropertyEditor editor) {
-			// return !"nextStep".equalsIgnoreCase(editor.getProperty());
-			// // property will be ignored if 'false'
-			// //is returned (i.e., 'nextStep' will be ignored by the following
-			// //traverser, see below)
-			// }
-			// };
-
 			// in order to collect "top" pathways, first, we create a copy of
 			// the collection (because model.getObjects.remove() method is not
 			// supported!)
-			final Set<Pathway> thisPathway = new HashSet<Pathway>();
-			thisPathway.addAll(model.getObjects(Pathway.class));
+			final Set<BioPAXElement> thisPathway = new HashSet<BioPAXElement>();
+			thisPathway.addAll(model.getObjects());
 			System.out.println("There are " + model.getObjects().size() + " objects in the model");
 
-			// Iterator<Pathway> iter = thisPathway.iterator();
-			// while (iter.hasNext()) {
-			// Pathway foo = iter.next();
-			// System.out.println(" " + foo.getName());
-			// }
+			Vector<Pathway> n = new Vector<Pathway>();
 
-			walkPath(thisPathway);
-			EditorMap editorMap = SimpleEditorMap.get(model.getLevel());
-
-			@SuppressWarnings("unchecked")
-			AbstractTraverser checker = new AbstractTraverser(editorMap) {
-				protected void visit(Object value, BioPAXElement parent, Model model1, PropertyEditor editor) {
-					if (value instanceof Pathway && thisPathway.contains(value)) {
-						// System.out.println(" Removing " + value.toString());
-						thisPathway.remove((BioPAXElement) value); // - not a "root" pathway
-					} else {
-						// System.out.println(" Keeping " + value.toString());
-					}
-				}
-			};
-
-			// now, let's run it to remove sub-pathways -
-			for (BioPAXElement e : model.getObjects()) {
-				checker.traverse(e, null);
-			}
-
-			System.out.println("There are " + model.getObjects().size() + " objects in the model");
-
-		}
-	}
-
-	public PathOpt(String sbmlFile, String defaultsFile) {
-		init(sbmlFile);
-		readDefaultsFile(defaultsFile);
-	}
-
-	/*
-	 * Read in a defaults file of the format: species_name=XX.X
-	 * 
-	 * This value will replace the starting quantity for that molecule species
-	 */
-	public void readDefaultsFile(String defaultsFile) {
-		try {
-			// Read the file
-			FileInputStream inputFile = new FileInputStream(defaultsFile);
-			DataInputStream inStream = new DataInputStream(inputFile);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-			String strLine;
-			String species;
-			double quantity;
-
-			// Grab a line, split it to get a value pair
-			while ((strLine = reader.readLine()) != null) {
-				// Check for comments or blank lines and ignore them
-				if (strLine.startsWith("#") || strLine.equals("")) {
-					continue;
-				}
-
-				// Check for otherwise invalid formats
-				if (!Pattern.matches(".*=.*", strLine)) {
-					System.out.println("Invalid line: " + strLine);
-					continue;
-				}
-
-				String[] values = strLine.split("=");
-
-				species = values[0];
-				quantity = new Double(values[1]).doubleValue();
-
-				// If we couldn't find the species, print a warning
-				if (!allMolecules.setQuantity(species, quantity)) {
-					System.out.println("Species " + species + " defined in " + defaultsFile + " does not exist in this pathway");
-					continue;
+			Iterator<BioPAXElement> iter = thisPathway.iterator();
+			while (iter.hasNext()) {
+				BioPAXElement foo = iter.next();
+				if (foo instanceof Pathway) {
+					Pathway bar = (Pathway) foo;
+					// System.out.println("- " + bar.getRDFId() + "\t\t(" + bar.getDisplayName() + ")");
+					n.add(bar);
 				}
 			}
 
-			inStream.close();
-		} catch (Exception ex) {
-			System.out.println("Caught exception " + ex.getMessage());
+			Collections.sort(n, new PathwayComparator());
+
+			// We only sorted so we could get the first element in the pathway.
+			// This lets us create the root node.
+			root = new TreeNode(n.get(0));
+
+			// buildTree(root);
+			populate(root);
+			navigate(root, 0);
 		}
 	}
 
-	/*
-	 * Reset the quantity of molecules to their default values
-	 */
-	public void resetSimulation() {
-		for (Molecule m : allMolecules) {
-			m.resetQuantity();
+	public void populate(TreeNode node) {
+		BioPAXElement bpe = node.getElement();
+		if (bpe instanceof Pathway) {
+			// Get the components
+			Pathway myPath = (Pathway) bpe;
+			Set<Process> components = myPath.getPathwayComponent();
+			Iterator<Process> iter = components.iterator();
+			while (iter.hasNext()) {
+				Process process = iter.next();
+				TreeNode next = new TreeNode(process);
+				node.addChild(next);
+				populate(next);
+			}
 		}
 	}
 
-	public MoleculeList getMolecules() {
-		return allMolecules;
-	}
-
-	public void walkPath(Set<Pathway> path) {
-		Iterator<Pathway> iter = path.iterator();
+	public void navigate(TreeNode node, int depth) {
+		BioPAXElement bpe = node.getElement();
+		// System.out.println(depth + "\t" + bpe.getRDFId());
+		System.out.println(depth + "\t" + node.getElementName());
+		Vector<TreeNode> tn = node.getChildren();
+		Iterator<TreeNode> iter = tn.iterator();
 		while (iter.hasNext()) {
-			Pathway foo = iter.next();
-			System.out.println("- " + foo.getDisplayName());
-			Set<PathwayStep> steps = foo.getPathwayOrder();
-			// Iterator<PathwayStep> y = steps.iterator();
-			// while (y.hasNext()) {
-			// PathwayStep ps = y.next();
-			// System.out.println("=- " + ps.);
-			// }
+			navigate(iter.next(), depth + 1);
+		}
+	}
 
-			Set<Process> components = foo.getPathwayComponent();
-			Iterator<Process> x = components.iterator();
-			while (x.hasNext()) {
-				Process p = x.next();
-				System.out.println("=- " + p.getDisplayName());
+	public void buildTree(TreeNode node) {
+		// Recursively walk through the pathways
+		BioPAXElement bpe = node.getElement();
+
+		if (bpe instanceof Pathway) {
+			Pathway myPath = (Pathway) bpe;
+
+			Set<Process> components = myPath.getPathwayComponent();
+
+			Iterator<Process> process = components.iterator();
+			while (process.hasNext()) {
+				Process p = process.next();
+				node.addChild(new TreeNode(p));
+				System.out.println("=- " + p.getRDFId() + "\t\t(" + p.getDisplayName() + ")");
+			}
+
+			// If it's a pathway, keep adding children to it
+			Vector<TreeNode> myChildren = node.getChildren();
+			Iterator<TreeNode> i = myChildren.iterator();
+			while (i.hasNext()) {
+				TreeNode tn = i.next();
+				if (!tn.isLeaf()) {
+					buildTree(i.next());
+				}
+			}
+
+		} else if (bpe instanceof BiochemicalReaction) {
+			BiochemicalReaction bcr = (BiochemicalReaction) bpe;
+			Set<Entity> participants = bcr.getParticipant();
+			Iterator<Entity> e = participants.iterator();
+			while (e.hasNext()) {
+				Entity ent = e.next();
+				node.addChild(new TreeNode(ent));
+				System.out.println("==- " + ent.getRDFId() + "\t\t" + ent.getDisplayName());
 			}
 		}
 
+	}
+
+	public String parseRDFId(String id) {
+		String[] parts = id.split("#");
+		if (parts.length == 2) {
+			return id.split("#")[1];
+		} else {
+			return "Unknown";
+		}
 	}
 }
