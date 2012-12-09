@@ -25,6 +25,7 @@ import org.biopax.paxtools.model.BioPAXElement;
 import org.biopax.paxtools.model.BioPAXLevel;
 import org.biopax.paxtools.model.Model;
 import org.biopax.paxtools.model.level3.Pathway;
+import org.biopax.paxtools.model.level3.PathwayStep;
 import org.biopax.paxtools.model.level3.Process;
 
 /**
@@ -87,25 +88,7 @@ public class PathOpt {
 			// System.out.println(" " + foo.getName());
 			// }
 
-			Iterator<Pathway> iter = thisPathway.iterator();
-			while (iter.hasNext()) {
-				Pathway foo = iter.next();
-				System.out.println("- " + foo.getDisplayName());
-				// Set<PathwayStep> steps = foo.getPathwayOrder();
-				// Iterator<PathwayStep> y = steps.iterator();
-				// while (y.hasNext()) {
-				// PathwayStep ps = y.next();
-				// System.out.println("=- " + ps.getNextStep());
-				// }
-
-				Set<Process> components = foo.getPathwayComponent();
-				Iterator<Process> x = components.iterator();
-				while (x.hasNext()) {
-					Process p = x.next();
-					System.out.println("=- " + p.getDisplayName());
-				}
-			}
-
+			walkPath(thisPathway);
 			EditorMap editorMap = SimpleEditorMap.get(model.getLevel());
 
 			@SuppressWarnings("unchecked")
@@ -194,4 +177,25 @@ public class PathOpt {
 		return allMolecules;
 	}
 
+	public void walkPath(Set<Pathway> path) {
+		Iterator<Pathway> iter = path.iterator();
+		while (iter.hasNext()) {
+			Pathway foo = iter.next();
+			System.out.println("- " + foo.getDisplayName());
+			Set<PathwayStep> steps = foo.getPathwayOrder();
+			// Iterator<PathwayStep> y = steps.iterator();
+			// while (y.hasNext()) {
+			// PathwayStep ps = y.next();
+			// System.out.println("=- " + ps.);
+			// }
+
+			Set<Process> components = foo.getPathwayComponent();
+			Iterator<Process> x = components.iterator();
+			while (x.hasNext()) {
+				Process p = x.next();
+				System.out.println("=- " + p.getDisplayName());
+			}
+		}
+
+	}
 }
