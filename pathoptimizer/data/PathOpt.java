@@ -34,8 +34,6 @@ public class PathOpt {
 	// Value is a hash of the molecules (second key) and the quantities produced (second value) in that pathway
 	HashMap<String, HashMap<String, Integer>> quantities;
 
-	// Stack<Reaction> path;
-
 	public PathOpt(String paxFile) {
 		init(paxFile);
 	}
@@ -203,8 +201,8 @@ public class PathOpt {
 	 * @param molecule
 	 * @return
 	 */
-	public String findMost(String molecule) {
-		String curPathway = "";
+	public Vector<String> findMost(String molecule) {
+		Vector<String> pathways = new Vector<String>();
 		int most = 0;
 
 		Set<String> keys = quantities.keySet();
@@ -219,15 +217,21 @@ public class PathOpt {
 				String key1 = iter1.next();
 				if (key1.equals(molecule)) {
 					if (most < value.get(key1)) {
-						curPathway = key;
+						pathways.clear();
+						pathways.add(key);
 						most = value.get(key1);
+					} else if (most == value.get(key1)) {
+						pathways.add(key);
 					}
 				}
 			}
 		}
 
-		System.out.println("Pathway " + curPathway + " has the most " + molecule + " with " + most);
-		return curPathway;
+		Iterator<String> i = pathways.iterator();
+		while (i.hasNext()) {
+			System.out.println("Pathway " + i.next() + " has the most " + molecule + " with " + most);
+		}
+		return pathways;
 
 	}
 
