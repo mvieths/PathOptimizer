@@ -30,9 +30,7 @@ public class Launcher {
 	private static void createAndShowGUI() {
 		String pathwayFile = System.getenv("PATHWAY_FILE");
 
-		PathOpt path;
-
-		path = new PathOpt(pathwayFile);
+		PathOpt path = new PathOpt(pathwayFile);
 
 		// // Disable boldface controls.
 		// UIManager.put("swing.boldMetal", Boolean.FALSE);
