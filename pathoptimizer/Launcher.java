@@ -3,7 +3,7 @@
  */
 package pathoptimizer;
 
-import pathoptimizer.data.PathOpt;
+import pathoptimizer.data.PathSearch;
 
 /**
  * @author Michael Vieths
@@ -30,7 +30,7 @@ public class Launcher {
 	private static void createAndShowGUI() {
 		String pathwayFile = System.getenv("PATHWAY_FILE");
 
-		PathOpt path = new PathOpt(pathwayFile);
+		PathSearch path = new PathSearch(pathwayFile);
 
 		// // Disable boldface controls.
 		// UIManager.put("swing.boldMetal", Boolean.FALSE);

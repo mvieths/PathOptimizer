@@ -27,14 +27,14 @@ import org.biopax.paxtools.model.level3.Process;
  * @author Michael Vieths
  * 
  */
-public class PathOpt {
+public class PathSearch {
 	Model model;
 	TreeNode root;
 	// Key is the pathway name (Pathway1, etc.)
 	// Value is a hash of the molecules (second key) and the quantities produced (second value) in that pathway
 	HashMap<String, HashMap<String, Integer>> quantities;
 
-	public PathOpt(String paxFile) {
+	public PathSearch(String paxFile) {
 		init(paxFile);
 	}
 
@@ -103,6 +103,8 @@ public class PathOpt {
 			navigate(root, (Pathway) root.getElement(), 0);
 			// printTotals();
 			findMost("ADP");
+			System.out.println("\n");
+			printTotals();
 		}
 	}
 
@@ -227,9 +229,10 @@ public class PathOpt {
 			}
 		}
 
+		System.out.println("The most " + molecule + " in a pathway is " + most + ", found in pathway(s):");
 		Iterator<String> i = pathways.iterator();
 		while (i.hasNext()) {
-			System.out.println("Pathway " + i.next() + " has the most " + molecule + " with " + most);
+			System.out.println("\t" + i.next());
 		}
 		return pathways;
 
